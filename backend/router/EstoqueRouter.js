@@ -1,9 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const controller = require('../controller/EstoqueController');
+const express = require("express")
+const router = express.Router()
+const estoqueController = require("../controller/EstoqueController")
 
-router.post('/', controller.adicionarEstoque);
-router.get('/', controller.listarEstoque);
-router.delete('/:codigo', controller.deletarEstoque);
+// GET - Listar todos os produtos
+router.get("/", estoqueController.listarProdutos)
 
-module.exports = router;
+// GET - Buscar produto específico pelo código
+router.get("/:codigo", estoqueController.buscarProdutoPorCodigo)
+
+// DELETE - Excluir produto
+router.delete("/:codigo", estoqueController.excluirProduto)
+
+module.exports = router

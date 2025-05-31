@@ -38,11 +38,13 @@
           <label for="descricao">Descrição</label>
           <textarea id="descricao" v-model="produto.descricao"></textarea>
         </div>
-
         <div class="form-actions">
           <button type="submit" class="btn-salvar" :disabled="loading">
             <span v-if="!loading">Salvar Produto</span>
             <span v-else class="loading-spinner"></span>
+          </button>
+          <button type="button" class="btn-cancelar" @click="cancelar" :disabled="loading">
+            <span v-if="!loading">Cancelar</span>
           </button>
         </div>
       </form>
@@ -79,7 +81,10 @@ export default {
         console.error('Erro ao salvar produto:', error);
         alert('Erro ao salvar produto');
       } 
-    }
+    },
+    cancelar() {
+    this.$router.push('/estoque'); // Redireciona para estoque ou outra rota desejada
+  }
   }
 };
 </script>
@@ -162,6 +167,41 @@ textarea {
   opacity: 0.8;
 }
 
+.btn-cancelar {
+  background: #f44336;;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-block;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  text-align: center;
+  min-width: 150px;
+  position: relative;
+}
+
+.btn-cancelar:hover:not(:disabled) {
+  background-color: #f44336;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.btn-cancelar:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-cancelar:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
 .loading-spinner {
   display: inline-block;
   width: 20px;
@@ -170,6 +210,13 @@ textarea {
   border-radius: 50%;
   border-top-color: #fff;
   animation: spin 1s ease-in-out infinite;
+}
+
+.form-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 20px; /* Espaçamento entre os botões */
+  justify-content: flex-start;
 }
 
 @keyframes spin {

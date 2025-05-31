@@ -37,6 +37,15 @@ app.use('/api/recibo', reciboRoutes);
 const editarNovaOSRoutes = require('./router/EditarNovaOSRouter');
 app.use('/api/editarnovaos', editarNovaOSRoutes);
 
+const listaServicoRoutes = require('./router/ListaServicoRouter');
+app.use('/api/listaservico', listaServicoRoutes);
+
+const cadastroServicoRoutes = require('./router/CadastroServicoRouter');
+app.use('/api/servico', cadastroServicoRoutes);
+
+const editarServicoRoutes = require('./router/EditarServicoRouter');
+app.use('/api/editarservico', editarServicoRoutes);
+
 
 // Inicialização do servidor
 app.listen(3000, () => console.log('Servidor rodando em http://localhost:3000'));

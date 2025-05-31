@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const produtoSchema = new mongoose.Schema(
+const servicoSchema = new mongoose.Schema(
   {
     codigo: {
       type: String,
@@ -11,25 +11,19 @@ const produtoSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    categoria: {
+    descricao: {
       type: String,
-      required: true,
+      default: "",
     },
-    quantidade: {
+    valor: {
       type: Number,
       required: true,
       min: 0,
-      default: 0,
     },
-    preco: {
+    tempo_medio: {
       type: Number,
-      required: true,
-      min: 0,
       default: 0,
-    },
-    ultimaAtualizacao: {
-      type: Date,
-      default: Date.now,
+      min: 0,
     },
   },
   {
@@ -37,4 +31,4 @@ const produtoSchema = new mongoose.Schema(
   },
 )
 
-module.exports = mongoose.model("Produto", produtoSchema)
+module.exports = mongoose.model("Servico", servicoSchema)

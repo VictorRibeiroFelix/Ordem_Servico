@@ -8,7 +8,7 @@
         </li>
         <li class="active"><a href="#">📦 Estoque</a></li>
         <li><a href="/cadastrocliente">👥 Clientes</a></li>
-        <li><a href="/cadastroservico">🛠️ Serviços</a></li>
+        <li><a href="/listaservico">🛠️ Serviços</a></li>
         <li><a href="/cadastrofuncionario">🧰 Técnicos</a></li>
         <li>
           <router-link to="/relatorioos">📈 Relatórios</router-link>
@@ -27,33 +27,55 @@
         <input type="text" placeholder="🔍 Pesquisa" v-model="busca" />
       </div>
 
-      <table class="tabela">
+      <!-- Mensagem de erro -->
+      <div v-if="erro" class="erro-mensagem">
+        {{ erro }}
+      </div>
+
+      <!-- Loading -->
+      <div v-if="carregando" class="loading">
+        Carregando produtos...
+      </div>
+
+      <table class="tabela" v-else>
         <thead>
           <tr>
               <th>ID</th>
               <th>Nome</th>
               <th>Categoria</th>
-              <th>Quantidade</th> <!-- estoque atual -->
+              <th>Quantidade</th>
               <th>Preço</th>
               <th>Última Atualização</th>
               <th>Ações</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in itensFiltrados" :key="item.codigo">
-            <td>{{ item.codigo }}</td>
+          <tr v-for="item in itensFiltrados" :key="item.codigo || item._id">
+            <td>{{ item.codigo || item._id }}</td>
             <td>{{ item.nome }}</td>
             <td>{{ item.categoria }}</td>
             <td>{{ item.quantidade }}</td>
-            <td>{{ item.preco }}</td>
-            <td>{{ formatarData(item.ultimaAtualizacao) }}</td>
+            <td>R$ {{ formatarPreco(item.preco) }}</td>
+            <td>{{ formatarData(item.ultimaAtualizacao || item.createdAt) }}</td>
             <td>
-              <router-link :to="{ path: '/editarproduto', query: { codigo: item.codigo } }" class="btn-editar">Editar</router-link>
-              <button class="btn-excluir" @click="confirmarExclusao(item.codigo)">Excluir</button>
+              <router-link 
+                :to="{ path: '/editarproduto', query: { codigo: item.codigo || item._id } }" 
+                class="btn-editar"
+              >
+                Editar
+              </router-link>
+              <button class="btn-excluir" @click="confirmarExclusao(item.codigo || item._id)">
+                Excluir
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- Mensagem quando não há itens -->
+      <div v-if="!carregando && itens.length === 0" class="sem-itens">
+        Nenhum produto encontrado.
+      </div>
 
       <!-- Modal de confirmação -->
       <div v-if="mostrarModal" class="modal-overlay">
@@ -74,55 +96,115 @@
 import axios from 'axios';
 
 export default {
+  name: 'GestaoEstoque',
   data() {
     return {
       itens: [],
       busca: '',
       mostrarModal: false,
       itemParaExcluir: null,
+      carregando: false,
+      erro: null,
+      // URLs corretas baseadas no seu server.js
+      apiBaseUrl: 'http://localhost:3000/api'
     };
   },
   computed: {
-  itensFiltrados() {
-    const termo = this.busca.toLowerCase();
-    return this.itens.filter((item) =>
-      item.nome.toLowerCase().includes(termo) ||
-      item.categoria.toLowerCase().includes(termo)
-    );
+    itensFiltrados() {
+      const termo = this.busca.toLowerCase();
+      return this.itens.filter((item) =>
+        item.nome.toLowerCase().includes(termo) ||
+        item.categoria.toLowerCase().includes(termo) ||
+        (item.codigo && item.codigo.toString().toLowerCase().includes(termo))
+      );
+    },
   },
-},
   methods: {
     async carregarItens() {
       try {
-        const response = await axios.get('http://localhost:3000/api/produto');
-        this.itens = response.data;
+        this.carregando = true;
+        this.erro = null;
+        
+        // Tenta primeiro a rota de estoque, depois produto
+        let response;
+        try {
+          response = await axios.get(`${this.apiBaseUrl}/estoque`);
+        } catch (estoqueError) {
+          console.log('Tentando rota /produto...');
+          response = await axios.get(`${this.apiBaseUrl}/produto`);
+        }
+        
+        if (response.data && Array.isArray(response.data)) {
+          this.itens = response.data;
+        } else if (response.data) {
+          // Se não for array, pode ser um objeto com os dados
+          this.itens = Array.isArray(response.data.produtos) ? response.data.produtos : [response.data];
+        } else {
+          this.erro = 'Formato de dados inválido recebido do servidor';
+        }
       } catch (err) {
         console.error('Erro ao carregar estoque:', err);
+        
+        if (err.response) {
+          this.erro = `Erro ${err.response.status}: ${err.response.data.message || 'Erro ao carregar produtos'}`;
+        } else if (err.request) {
+          this.erro = 'Servidor não respondeu. Verifique se a API está rodando em http://localhost:3000';
+        } else {
+          this.erro = `Erro na requisição: ${err.message}`;
+        }
+      } finally {
+        this.carregando = false;
       }
     },
+    
     formatarData(data) {
-  if (!data) return '—';
-  const d = new Date(data);
-  const dia = String(d.getDate()).padStart(2, '0');
-  const mes = String(d.getMonth() + 1).padStart(2, '0');
-  const ano = d.getFullYear();
-  return `${dia}/${mes}/${ano}`;
-},
-  confirmarExclusao(codigo) {
-    this.itemParaExcluir = codigo;
-    this.mostrarModal = true;
-  },
-  cancelarExclusao() {
-    this.mostrarModal = false;
-    this.itemParaExcluir = null;
-  },
+      if (!data) return '—';
+      const d = new Date(data);
+      const dia = String(d.getDate()).padStart(2, '0');
+      const mes = String(d.getMonth() + 1).padStart(2, '0');
+      const ano = d.getFullYear();
+      return `${dia}/${mes}/${ano}`;
+    },
+    
+    formatarPreco(preco) {
+      if (!preco) return '0,00';
+      return parseFloat(preco).toFixed(2).replace('.', ',');
+    },
+    
+    confirmarExclusao(codigo) {
+      this.itemParaExcluir = codigo;
+      this.mostrarModal = true;
+    },
+    
+    cancelarExclusao() {
+      this.mostrarModal = false;
+      this.itemParaExcluir = null;
+    },
+    
     async excluirItem() {
       try {
-        await axios.delete(`http://localhost:3000/api/estoque/${this.itemParaExcluir}`);
-        this.itens = this.itens.filter((item) => item.codigo !== this.itemParaExcluir);
+        this.carregando = true;
+        
+        // Tenta excluir usando a rota de estoque
+        await axios.delete(`${this.apiBaseUrl}/estoque/${this.itemParaExcluir}`);
+        
+        // Remove o item da lista local
+        this.itens = this.itens.filter((item) => 
+          (item.codigo || item._id) !== this.itemParaExcluir
+        );
         this.mostrarModal = false;
+        this.itemParaExcluir = null;
+        
       } catch (err) {
-        console.error('Erro ao excluir estoque:', err);
+        console.error('Erro ao excluir produto:', err);
+        
+        if (err.response) {
+          this.erro = `Erro ${err.response.status}: ${err.response.data.message || 'Erro ao excluir produto'}`;
+        } else {
+          this.erro = 'Erro ao excluir produto. Tente novamente.';
+        }
+      } finally {
+        this.carregando = false;
       }
     },
   },
@@ -131,7 +213,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .estoque-layout {
@@ -251,7 +332,7 @@ h1 {
   text-decoration: none;
 }
 
-/* AÇÕES - NOVAS CORES */
+/* AÇÕES */
 .btn-editar {
   background-color: #e1f0ff;
   color: #1a73e8;
@@ -282,6 +363,30 @@ h1 {
 
 .btn-excluir:hover {
   background-color: #ffcdd2;
+}
+
+/* Estados */
+.erro-mensagem {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #ffcdd2;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+.sem-itens {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 16px;
 }
 
 /* Modal */

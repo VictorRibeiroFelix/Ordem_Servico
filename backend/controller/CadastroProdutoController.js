@@ -11,7 +11,7 @@ exports.criarProduto = async (req, res) => {
   }
 };
 
-exports.listarProdutos = async (req, res) => {
+exports.listarProduto = async (req, res) => {
   try {
     const produtos = await Produto.find();
     res.json(produtos);

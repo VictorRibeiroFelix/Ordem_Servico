@@ -154,10 +154,11 @@ export default {
   methods: {
     async carregarOrdens() {
       try {
-        const response = await axios.get('http://localhost:3000/api/ordens');
-        this.pedidos = response.data;
-      } catch (error) {
-        console.error('Erro ao carregar ordens:', error);
+        const response = await axios.get('http://localhost:3000/api/pedido');
+        console.log('Pedidos recebidos:', response.data);
+        this.pedido = response.data;
+      } catch (err) {
+        console.error('Erro ao carregar estoque:', err);
       }
     },
     formatarData(data) {
@@ -177,7 +178,7 @@ export default {
       if (!this.pedidoParaExcluir) return;
 
       try {
-        await axios.delete(`http://localhost:3000/api/ordens/${this.pedidoParaExcluir._id}`);
+        await axios.delete(`http://localhost:3000/api/pedido/${this.pedidoParaExcluir._id}`);
         this.carregarOrdens();
         this.cancelarExclusao();
       } catch (error) {
@@ -185,6 +186,7 @@ export default {
       }
     }
   }
+  
 };
 </script>
 

@@ -1,8 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const controller = require('../controller/EditarProdutoController'); // Verifique esse caminho!
+const express = require("express")
+const router = express.Router()
+const editarProdutoController = require("../controller/EditarProdutoController")
 
-router.get('/:codigo', controller.getProduto);
-router.put('/:codigo', controller.updateProduto);
+// GET - Buscar produto específico pelo código
+router.get("/:codigo", editarProdutoController.buscarProdutoPorCodigo)
 
-module.exports = router;
+// PUT - Atualizar produto
+router.put("/:codigo", editarProdutoController.atualizarProduto)
+
+module.exports = router

@@ -47,6 +47,21 @@ const routes = [
     path: '/editarnovaos',
     name: 'EditarNovaOS',
     component: () => import('../view/EditarNovaOSView.vue')
+  },
+  {
+    path: '/servico',
+    name: 'Servico',
+    component: () => import('../view/CadastroServicoView.vue')
+  },
+  {
+    path: '/listaservico',
+    name: 'ListaServico',
+    component: () => import('../view/ListaServicoView.vue')
+  },
+  {
+    path: '/editarservico',
+    name: 'EditarServico',
+    component: () => import('../view/EditarServicoView.vue')
   }
 ];
 
