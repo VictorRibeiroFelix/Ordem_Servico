@@ -79,9 +79,11 @@ export default {
         if (this.editando) {
           await axios.put(`http://localhost:3000/api/cliente/${this.cliente._id}`, this.cliente);
           alert('Cliente atualizado com sucesso!');
+          this.$router.push('/listacliente');
         } else {
           await axios.post('http://localhost:3000/api/cliente', this.cliente);
           alert('Cliente cadastrado com sucesso!');
+          this.$router.push('/listacliente');
         }
         this.$emit('atualizar');
         this.$emit('limpar');

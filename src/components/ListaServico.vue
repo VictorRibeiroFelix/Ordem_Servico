@@ -60,9 +60,8 @@
             <td>
               <router-link 
                 :to="{ path: '/editarservico', query: { id: serv._id, edit: true } }" 
-                class="btn-editar"
-              >
-                Editar
+                class="btn-editar"> 
+              Editar
               </router-link>
               <button class="btn-excluir" @click="confirmarExclusao(serv._id, serv.nome)">
                 Excluir
@@ -290,30 +289,32 @@ export default {
     },
     
     async excluirServicoFinal() {
-      try {
-        console.log(`🗑️ Excluindo serviço: ${this.servicoParaExcluir}`);
-        
-        // Tenta excluir usando ambas as rotas
-        try {
-          await axios.delete(`${this.apiBaseUrl}/servico/${this.servicoParaExcluir}`);
-          console.log('✅ Serviço excluído via /api/servico');
-        } catch (error) {
-          console.log('⚠️ Tentando excluir via /api/listaservico...');
-          await axios.delete(`${this.apiBaseUrl}/listaservico/${this.servicoParaExcluir}`);
-          console.log('✅ Serviço excluído via /api/listaservico');
-        }
-        
-        // Recarrega a lista
-        await this.carregarServicos();
-        this.cancelarExclusao();
-        
-        alert('Serviço excluído com sucesso!');
-        
-      } catch (error) {
-        console.error('❌ Erro ao excluir serviço:', error);
-        alert(`Erro ao excluir serviço: ${error.response?.data?.message || error.message}`);
-      }
+  try {
+    console.log(`🗑️ Excluindo serviço: ${this.servicoParaExcluir}`);
+    
+    // Use a rota que funciona: /api/editarservico
+    await axios.delete(`${this.apiBaseUrl}/editarservico/${this.servicoParaExcluir}`);
+    console.log('✅ Serviço excluído via /api/editarservico');
+    
+    // Recarrega a lista
+    await this.carregarServicos();
+    this.cancelarExclusao();
+    
+    alert('Serviço excluído com sucesso!');
+    
+  } catch (error) {
+    console.error('❌ Erro ao excluir serviço:', error);
+    
+    // Mensagem de erro mais detalhada
+    if (error.response) {
+      alert(`Erro ${error.response.status}: ${error.response.data?.message || 'Não foi possível excluir o serviço'}`);
+    } else if (error.request) {
+      alert('Servidor não respondeu à solicitação. Verifique sua conexão.');
+    } else {
+      alert(`Erro ao excluir serviço: ${error.message}`);
     }
+  }
+}
   }
 };
 </script>

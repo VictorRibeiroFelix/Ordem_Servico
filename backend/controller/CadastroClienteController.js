@@ -1,48 +1,45 @@
-const Cliente = require('../model/ListaCliente');
+// Adicione estes métodos ao seu controller existente
 
-exports.getClientes = async (req, res) => {
+// Buscar cliente por ID
+exports.buscarClientePorId = async (req, res) => {
   try {
-    const clientes = await Cliente.find();
-    res.json(clientes);
-  } catch (error) {
-    res.status(500).json({ erro: 'Erro ao buscar clientes' });
-  }
-};
-
-exports.getClienteById = async (req, res) => {
-  try {
+    console.log(`[ClienteController] Buscando cliente ID: ${req.params.id}`);
+    
     const cliente = await Cliente.findById(req.params.id);
-    if (!cliente) return res.status(404).json({ erro: 'Cliente não encontrado' });
+    
+    if (!cliente) {
+      console.log(`[ClienteController] Cliente não encontrado: ${req.params.id}`);
+      return res.status(404).json({ message: 'Cliente não encontrado' });
+    }
+    
+    console.log(`[ClienteController] Cliente encontrado: ${cliente.nome}`);
     res.json(cliente);
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao buscar cliente' });
+    console.error('[ClienteController] Erro ao buscar cliente:', error);
+    res.status(500).json({ message: 'Erro ao buscar cliente', error: error.message });
   }
 };
 
-exports.criarCliente = async (req, res) => {
-  try {
-    const novoCliente = new Cliente(req.body);
-    await novoCliente.save();
-    res.status(201).json(novoCliente);
-  } catch (error) {
-    res.status(500).json({ erro: 'Erro ao criar cliente' });
-  }
-};
-
+// Atualizar cliente
 exports.atualizarCliente = async (req, res) => {
   try {
-    const clienteAtualizado = await Cliente.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    console.log(`[ClienteController] Atualizando cliente ID: ${req.params.id}`);
+    
+    const clienteAtualizado = await Cliente.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    
+    if (!clienteAtualizado) {
+      console.log(`[ClienteController] Cliente não encontrado para atualização: ${req.params.id}`);
+      return res.status(404).json({ message: 'Cliente não encontrado' });
+    }
+    
+    console.log(`[ClienteController] Cliente atualizado: ${clienteAtualizado.nome}`);
     res.json(clienteAtualizado);
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao atualizar cliente' });
-  }
-};
-
-exports.excluirCliente = async (req, res) => {
-  try {
-    await Cliente.findByIdAndDelete(req.params.id);
-    res.json({ mensagem: 'Cliente excluído com sucesso' });
-  } catch (error) {
-    res.status(500).json({ erro: 'Erro ao excluir cliente' });
+    console.error('[ClienteController] Erro ao atualizar cliente:', error);
+    res.status(500).json({ message: 'Erro ao atualizar cliente', error: error.message });
   }
 };

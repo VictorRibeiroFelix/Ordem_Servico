@@ -7,8 +7,8 @@
         <li><router-link to="/estoque">📦 Estoque</router-link></li>
         <li class="active"><a href="#">👥 Clientes</a></li>
         <li><router-link to="/listaservico">🛠️ Serviços</router-link></li>
-        <li><router-link to="/cadastrofuncionario">🧰 Técnicos</router-link></li>
-        <li><router-link to="/relatorioos">📈 Relatórios</router-link></li>
+        <li><router-link to="/">🧰 Técnicos</router-link></li>
+        <li><router-link to="/">📈 Relatórios</router-link></li>
       </ul>
     </aside>
 
@@ -47,7 +47,9 @@
       <td>{{ cliente.telefone }}</td>
       <td>{{ cliente.endereco }}</td>
       <td>
-        <button class="botao-editar" @click="$emit('editar', cliente)">Editar</button>
+      
+        <router-link :to="`/editarcliente/${cliente._id}`" class="botao-editar">Editar</router-link>
+
         <button class="botao-excluir" @click="excluirCliente(cliente._id)">Excluir</button>
       </td>
     </tr>
@@ -157,7 +159,7 @@ export default {
 }
 
 .cadastro-container {
-  max-width: 1000px;
+  max-width: 1300px;
   margin: 0 auto;
 }
 
@@ -197,18 +199,20 @@ h1 {
 
 .tabela {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.tabela th,
-.tabela td {
+.tabela th, .tabela td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  word-wrap: break-word;
 }
+
 
 .tabela th {
   background: #f9f9f9;

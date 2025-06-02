@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const ClienteSchema = new mongoose.Schema({
   nome: { type: String, required: true },
+  cpfCnpj: { type: String }, // ✅ Adicionado aqui
   telefone: { type: String },
   email: { type: String },
   endereco: { type: String },

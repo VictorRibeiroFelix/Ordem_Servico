@@ -33,39 +33,6 @@ class ListaServicoController {
     }
   }
 
-  // NOVO: Buscar serviço por ID (ObjectId)
-  async buscarServicoPorId(req, res) {
-    try {
-      const { id } = req.params;
-      console.log(`[ServicoController] Buscando serviço por ID: ${id}`);
-
-      let servico = null;
-
-      // Tenta buscar por ObjectId primeiro
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        servico = await Servico.findOne({ _id: id, ativo: true });
-        console.log(`[ServicoController] Busca por ObjectId: ${servico ? 'encontrado' : 'não encontrado'}`);
-      }
-
-      // Se não encontrou por ObjectId, tenta por código
-      if (!servico) {
-        servico = await Servico.findOne({ codigo: id, ativo: true });
-        console.log(`[ServicoController] Busca por código: ${servico ? 'encontrado' : 'não encontrado'}`);
-      }
-
-      if (!servico) {
-        console.log(`[ServicoController] Serviço não encontrado: ${id}`);
-        return res.status(404).json({ message: "Serviço não encontrado" });
-      }
-
-      console.log(`[ServicoController] Serviço encontrado: ${servico.nome}`);
-      res.json(servico);
-    } catch (error) {
-      console.error("[ServicoController] Erro ao buscar serviço por ID:", error);
-      res.status(500).json({ message: "Erro ao buscar serviço", error: error.message });
-    }
-  }
-
   async buscarServico(req, res) {
     try {
       const servico = await Servico.findOne({ codigo: req.params.codigo })
@@ -147,7 +114,6 @@ class ListaServicoController {
         descricao: req.body.descricao?.trim() || "",
         valor: Number.parseFloat(req.body.valor) || 0,
         tempo_medio: Number.parseInt(req.body.tempo_medio) || 0,
-        updatedAt: new Date()
       }
 
       // Se o código foi alterado, verifica se não existe outro serviço com o mesmo código
@@ -241,5 +207,7 @@ class ListaServicoController {
     }
   }
 }
+
+
 
 module.exports = new ListaServicoController()

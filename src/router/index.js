@@ -72,6 +72,11 @@ const routes = [
     path: '/cliente',
     name: 'Cliente',
     component: () => import('../view/CadastroClienteView.vue')
+  },
+  {
+    path: '/editarcliente/:id',
+    name: 'EditarCliente',
+    component: () => import('../view/EditarClienteView.vue')
   }
 ];
 
