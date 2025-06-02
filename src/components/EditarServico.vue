@@ -95,62 +95,33 @@ export default {
     this.carregarServico();
   },
   methods: {
-    async carregarServico() {
-      this.carregando = true;
-      this.erro = null;
+   // No EditarServico.vue, altere o método carregarServico()
+async carregarServico() {
+  this.carregando = true;
+  this.erro = null;
 
-      // Verifica se o ID do serviço existe
-      if (!this.servicoId) {
-        this.erro = 'ID do serviço não especificado na URL';
-        this.carregando = false;
-        return;
-      }
+  if (!this.servicoId) {
+    this.erro = 'ID do serviço não especificado na URL';
+    this.carregando = false;
+    return;
+  }
 
-      console.log(`🔍 Buscando serviço com ID: ${this.servicoId}`);
+  try {
+    // Use a rota que funciona: /api/editarservico
+    const response = await axios.get(`${this.apiBaseUrl}/editarservico/${this.servicoId}`);
+    this.servico = response.data;
+    console.log('📋 Serviço carregado:', this.servico);
+  } catch (error) {
+    console.error('❌ Erro ao buscar serviço:', error);
+    if (error.response) {
+      this.erro = `Erro ${error.response.status}: ${error.response.data?.message || 'Não foi possível buscar os dados do serviço'}`;
+    } else {
+      this.erro = 'Servidor não respondeu à solicitação. Verifique sua conexão.';
+    }
+  }
 
-      // Tenta buscar o serviço usando diferentes rotas
-      let response = null;
-      let error = null;
-
-      // Tenta a rota /api/servico/:id
-      try {
-        response = await axios.get(`${this.apiBaseUrl}/servico/${this.servicoId}`);
-        console.log('✅ Serviço carregado via /api/servico');
-      } catch (err) {
-        console.log('⚠️ Falha na rota /api/servico, tentando /api/listaservico...');
-        error = err;
-      }
-
-      // Se falhou, tenta a rota /api/listaservico/:id
-      if (!response) {
-        try {
-          response = await axios.get(`${this.apiBaseUrl}/listaservico/${this.servicoId}`);
-          console.log('✅ Serviço carregado via /api/listaservico');
-          error = null;
-        } catch (err) {
-          console.log('❌ Falha em todas as rotas');
-          error = err;
-        }
-      }
-
-      // Processa o resultado
-      if (response && response.data) {
-        this.servico = response.data;
-        console.log('📋 Serviço carregado:', this.servico);
-      } else {
-        console.error('❌ Erro ao buscar serviço:', error);
-
-        if (error.response) {
-          this.erro = `Erro ${error.response.status}: ${error.response.data?.message || 'Não foi possível buscar os dados do serviço'}`;
-        } else if (error.request) {
-          this.erro = 'Servidor não respondeu à solicitação. Verifique sua conexão.';
-        } else {
-          this.erro = `Erro na requisição: ${error.message}`;
-        }
-      }
-
-      this.carregando = false;
-    },
+  this.carregando = false;
+},
 
     async atualizarServico() {
       this.salvando = true;
@@ -167,7 +138,7 @@ export default {
 
       // Tenta a rota /api/servico/:id
       try {
-        response = await axios.put(`${this.apiBaseUrl}/servico/${this.servicoId}`, this.servico);
+        response = await axios.put(`${this.apiBaseUrl}/editarservico/${this.servicoId}`, this.servico);
         console.log('✅ Serviço salvo via /api/servico');
       } catch (err) {
         console.log('⚠️ Falha ao salvar via /api/servico, tentando /api/listaservico...');
@@ -177,7 +148,7 @@ export default {
       // Se falhou, tenta a rota /api/listaservico/:id
       if (!response) {
         try {
-          response = await axios.put(`${this.apiBaseUrl}/listaservico/${this.servicoId}`, this.servico);
+          response = await axios.put(`${this.apiBaseUrl}/servico/${this.servicoId}`, this.servico);
           console.log('✅ Serviço salvo via /api/listaservico');
           error = null;
         } catch (err) {

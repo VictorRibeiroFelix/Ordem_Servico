@@ -62,6 +62,16 @@ const routes = [
     path: '/editarservico',
     name: 'EditarServico',
     component: () => import('../view/EditarServicoView.vue')
+  },
+  {
+    path: '/listacliente',
+    name: 'ListaCliente',
+    component: () => import('../view/ListaClienteView.vue')
+  },
+  {
+    path: '/cliente',
+    name: 'Cliente',
+    component: () => import('../view/CadastroClienteView.vue')
   }
 ];
 

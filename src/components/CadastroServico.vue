@@ -134,23 +134,15 @@ export default {
         
         if (this.editando) {
           // Atualizar serviço existente
-          try {
-            await axios.put(`http://localhost:3000/api/servico/${this.servico._id}`, this.servico);
-          } catch (error) {
-            await axios.put(`http://localhost:3000/api/listaservico/${this.servico._id}`, this.servico);
-          }
+          await axios.put(`http://localhost:3000/api/servico/${this.servico._id}`, this.servico);
           console.log('✅ Serviço atualizado');
         } else {
           // Criar novo serviço
-          try {
-            await axios.post('http://localhost:3000/api/servico', this.servico);
-            this.$router.push('/listaservico');
-          } catch (error) {
-            await axios.post('http://localhost:3000/api/listaservico', this.servico);
-          }
+          await axios.post('http://localhost:3000/api/servico', this.servico);
           console.log('✅ Serviço criado');
+          this.$router.push('/listaservico');
         }
-        
+
         this.mostrarModalSucesso = true;
         
       } catch (error) {

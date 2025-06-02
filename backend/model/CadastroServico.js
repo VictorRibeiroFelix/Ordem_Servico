@@ -1,28 +1,34 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose")
 
-const ServicoSchema = new mongoose.Schema({
-  nome: {
-    type: String,
-    required: true
-  },
+// Schema para o serviço
+const servicoSchema = new mongoose.Schema({
   codigo: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+  },
+  nome: {
+    type: String,
+    required: true,
   },
   descricao: {
-    type: String
+    type: String,
   },
   valor: {
     type: Number,
-    required: true
+    required: true,
   },
   tempo_medio: {
     type: Number,
-    required: true
-  }
-}, {
-  timestamps: true
-});
+  },
+  dataCriacao: {
+    type: Date,
+    default: Date.now,
+  },
+})
 
-module.exports = mongoose.model('Servico', ServicoSchema);
+// Exporta o schema para ser usado em outros lugares
+// NÃO CRIA O MODELO AQUI - apenas exporta o schema
+module.exports = {
+  servicoSchema,
+}

@@ -1,34 +1,7 @@
 const mongoose = require("mongoose")
+const { servicoSchema } = require("./CadastroServico")
 
-const servicoSchema = new mongoose.Schema(
-  {
-    codigo: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    nome: {
-      type: String,
-      required: true,
-    },
-    descricao: {
-      type: String,
-      default: "",
-    },
-    valor: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    tempo_medio: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-  },
-  {
-    timestamps: true, // Adiciona createdAt e updatedAt automaticamente
-  },
-)
+// Cria o modelo usando o schema importado
+const Servico = mongoose.model("Servico", servicoSchema)
 
-module.exports = mongoose.model("Servico", servicoSchema)
+module.exports = Servico

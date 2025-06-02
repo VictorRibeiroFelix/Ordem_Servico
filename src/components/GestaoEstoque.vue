@@ -7,7 +7,7 @@
           <router-link to="/">📊 Painel</router-link>
         </li>
         <li class="active"><a href="#">📦 Estoque</a></li>
-        <li><a href="/cadastrocliente">👥 Clientes</a></li>
+        <li><a href="/listacliente">👥 Clientes</a></li>
         <li><a href="/listaservico">🛠️ Serviços</a></li>
         <li><a href="/cadastrofuncionario">🧰 Técnicos</a></li>
         <li>

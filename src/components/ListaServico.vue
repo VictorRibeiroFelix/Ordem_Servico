@@ -5,7 +5,7 @@
       <ul class="menu">
         <li><router-link to="/">📊 Painel</router-link></li>
         <li><router-link to="/estoque">📦 Estoque</router-link></li>
-        <li><router-link to="/cadastrocliente">👥 Clientes</router-link></li>
+        <li><router-link to="/listacliente">👥 Clientes</router-link></li>
         <li class="active"><a href="#">🛠️ Serviços</a></li>
         <li><router-link to="/cadastrofuncionario">🧰 Técnicos</router-link></li>
         <li><router-link to="/relatorioos">📈 Relatórios</router-link></li>
@@ -56,7 +56,7 @@
             <td>{{ serv.nome }}</td>
             <td>{{ formatarMoeda(serv.valor) }}</td>
             <td>{{ serv.tempo_medio }} min</td>
-            <td>{{ formatarData(serv.createdAt) }}</td>
+            <td>{{ obterDataFormatada(serv) }}</td>
             <td>
               <router-link 
                 :to="{ path: '/editarservico', query: { id: serv._id, edit: true } }" 
@@ -159,6 +159,11 @@ export default {
         if (response.data && Array.isArray(response.data)) {
           this.servicos = response.data;
           console.log(`📊 ${this.servicos.length} serviços carregados`);
+          
+          // Log para debug - mostra o primeiro serviço
+          if (this.servicos.length > 0) {
+            console.log('Exemplo de serviço:', this.servicos[0]);
+          }
         } else {
           console.log('⚠️ Resposta da API não é um array:', response.data);
           this.servicos = [];
@@ -210,8 +215,66 @@ export default {
     
     formatarData(data) {
       if (!data) return '-';
-      const d = new Date(data);
-      return d.toLocaleDateString('pt-BR');
+      
+      try {
+        // Tenta diferentes formatos de data
+        let dataObj;
+        
+        if (typeof data === 'string') {
+          dataObj = new Date(data);
+        } else if (data instanceof Date) {
+          dataObj = data;
+        } else {
+          return '-';
+        }
+        
+        // Verifica se a data é válida
+        if (isNaN(dataObj.getTime())) {
+          console.warn('Data inválida:', data);
+          return '-';
+        }
+        
+        return dataObj.toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+      } catch (error) {
+        console.error('Erro ao formatar data:', error, data);
+        return '-';
+      }
+    },
+
+    // Nova função para obter a data formatada, tentando diferentes campos
+    obterDataFormatada(servico) {
+      // Tenta diferentes campos de data em ordem de prioridade
+      const dataFields = ['dataCriacao', 'createdAt', 'updatedAt', 'data'];
+      
+      for (const field of dataFields) {
+        if (servico[field]) {
+          return this.formatarData(servico[field]);
+        }
+      }
+      
+      // Se chegou aqui, não encontrou nenhum campo de data válido
+      return this.formatarDataAlternativa(servico);
+    },
+    
+    // Método alternativo para extrair data de criação
+    formatarDataAlternativa(servico) {
+      // Tenta extrair do _id do MongoDB (contém timestamp de criação)
+      if (servico._id && servico._id.length >= 8) {
+        try {
+          // O ObjectId do MongoDB contém um timestamp nos primeiros 4 bytes
+          const timestamp = parseInt(servico._id.substring(0, 8), 16) * 1000;
+          return this.formatarData(new Date(timestamp));
+        } catch (e) {
+          console.warn('Não foi possível extrair timestamp do _id:', e);
+        }
+      }
+      
+      // Última alternativa: data atual
+      return new Date().toLocaleDateString('pt-BR');
     },
     
     confirmarExclusao(id, nome) {
