@@ -5,10 +5,10 @@
       <ul class="menu">
         <li><router-link to="/">📊 Painel</router-link></li>
         <li><router-link to="/estoque">📦 Estoque</router-link></li>
-        <li class="active"><a href="#">👥 Clientes</a></li>
+        <li><router-link to="/listacliente">👥 Clientes</router-link></li>
         <li><router-link to="/listaservico">🛠️ Serviços</router-link></li>
-        <li><router-link to="/listafuncionario">🧰 Técnicos</router-link></li>
-        <li><router-link to="/">📈 Relatórios</router-link></li>
+        <li class="active"><a href="#">🧰 Técnicos</a></li>
+        <li><router-link to="/relatorioos">📈 Relatórios</router-link></li>
       </ul>
     </aside>
 
@@ -16,48 +16,48 @@
     <main class="conteudo-principal">
       <div class="cadastro-container">
         <div class="topo">
-          <h1>Lista de Clientes</h1>
-          <router-link to="/cliente" class="botao-novo">+ Novo Cliente</router-link>
+          <h1>Lista de Técnicos</h1>
+          <router-link to="/funcionario" class="botao-novo">+ Novo Técnico</router-link>
         </div>
 
         <div class="barra-busca">
-          <input
-            type="text"
-            placeholder="🔍 Pesquisar cliente"
-            v-model="termoBusca"
-          />
+          <input type="text" placeholder="🔍 Pesquisar técnico" v-model="termoBusca" />
         </div>
 
         <table class="tabela">
-  <thead>
-    <tr>
-      <th>Nome</th>
-      <th>CPF/CNPJ</th>
-      <th>Email</th>
-      <th>Telefone</th>
-      <th>Endereço</th>
-      <th>Ações</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-for="cliente in clientesFiltrados" :key="cliente._id">
-      <td>{{ cliente.nome }}</td>
-      <td>{{ cliente.cpfCnpj }}</td>
-      <td>{{ cliente.email }}</td>
-      <td>{{ cliente.telefone }}</td>
-      <td>{{ cliente.endereco }}</td>
-      <td>
-      
-        <router-link :to="`/editarcliente/${cliente._id}`" class="botao-editar">Editar</router-link>
-
-        <button class="botao-excluir" @click="excluirCliente(cliente._id)">Excluir</button>
-      </td>
-    </tr>
-    <tr v-if="clientesFiltrados.length === 0">
-      <td colspan="6" class="sem-resultados">Nenhum cliente encontrado</td>
-    </tr>
-  </tbody>
-</table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Função</th>
+              <th>Email</th>
+              <th>Telefone</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="func in funcionariosFiltrados" :key="func._id">
+              <td>{{ func.nome }}</td>
+              <td>{{ func.cpf }}</td>
+              <td>{{ func.funcao }}</td>
+              <td>{{ func.email }}</td>
+              <td>{{ func.telefone }}</td>
+              <td>
+                <router-link 
+                  :to="`/editarfuncionario/${func._id}`" 
+                  class="botao-editar">
+                  Editar
+                </router-link>
+                <button class="botao-excluir" @click="excluirFuncionario(func._id)">
+                  Excluir
+                </button>
+              </td>
+            </tr>
+            <tr v-if="funcionariosFiltrados.length === 0">
+              <td colspan="6" class="sem-resultados">Nenhum técnico encontrado</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </main>
   </div>
@@ -67,50 +67,49 @@
 import axios from 'axios';
 
 export default {
-  name: 'ListaCliente',
+  name: 'ListaFuncionario',
   data() {
     return {
-      clientes: [],
+      funcionarios: [],
       termoBusca: ''
     };
   },
   computed: {
-    clientesFiltrados() {
-  if (!this.termoBusca) return this.clientes;
-  const termo = this.termoBusca.toLowerCase();
-  return this.clientes.filter(c =>
-    c.nome.toLowerCase().includes(termo) ||
-    (c.cpfCnpj || '').toLowerCase().includes(termo) ||
-    (c.email || '').toLowerCase().includes(termo) ||
-    (c.telefone || '').includes(termo) ||
-    (c.endereco || '').toLowerCase().includes(termo)
-  );
-}
-
+    funcionariosFiltrados() {
+      if (!this.termoBusca) return this.funcionarios;
+      const termo = this.termoBusca.toLowerCase();
+      return this.funcionarios.filter(f =>
+        f.nome.toLowerCase().includes(termo) ||
+        (f.cpf || '').includes(termo) ||
+        (f.funcao || '').toLowerCase().includes(termo) ||
+        (f.email || '').toLowerCase().includes(termo) ||
+        (f.telefone || '').includes(termo)
+      );
+    }
   },
   methods: {
-    async carregarClientes() {
+    async carregarFuncionarios() {
       try {
-        const res = await axios.get('http://localhost:3000/api/cliente');
-        this.clientes = res.data;
+        const res = await axios.get('http://localhost:3000/api/funcionario');
+        this.funcionarios = res.data;
       } catch (err) {
-        console.error('Erro ao carregar clientes:', err);
+        console.error('Erro ao carregar técnicos:', err);
       }
     },
-    async excluirCliente(id) {
-      if (confirm('Deseja realmente excluir este cliente?')) {
+    async excluirFuncionario(id) {
+      if (confirm('Deseja excluir este técnico?')) {
         try {
-          await axios.delete(`http://localhost:3000/api/cliente/${id}`);
-          this.carregarClientes();
-          alert('Cliente excluído com sucesso!');
+          await axios.delete(`http://localhost:3000/api/funcionario/${id}`);
+          this.carregarFuncionarios();
+          alert('Técnico excluído com sucesso!');
         } catch (err) {
-          console.error('Erro ao excluir cliente:', err);
+          console.error('Erro ao excluir técnico:', err);
         }
       }
     }
   },
   mounted() {
-    this.carregarClientes();
+    this.carregarFuncionarios();
   }
 };
 </script>
@@ -199,20 +198,19 @@ h1 {
 
 .tabela {
   width: 100%;
-  table-layout: fixed;
   border-collapse: collapse;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.tabela th, .tabela td {
+.tabela th,
+.tabela td {
   padding: 12px 15px;
   text-align: left;
   font-size: 14px;
-  word-wrap: break-word;
+  border-bottom: 1px solid #eee;
 }
-
 
 .tabela th {
   background: #f9f9f9;
@@ -233,6 +231,7 @@ h1 {
   background-color: #e1f0ff;
   color: #1a73e8;
   border: 1px solid #d2e3fc;
+  text-decoration: none;
 }
 
 .botao-excluir {

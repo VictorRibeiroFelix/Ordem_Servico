@@ -77,6 +77,21 @@ const routes = [
     path: '/editarcliente/:id',
     name: 'EditarCliente',
     component: () => import('../view/EditarClienteView.vue')
+  },
+  {
+    path: '/listafuncionario',
+    name: 'ListaFuncionario',
+    component: () => import('../view/ListaFuncionarioView.vue')
+  },
+  {
+    path: '/funcionario',
+    name: 'Funcionario',
+    component: () => import('../view/CadastroFuncionarioView.vue')
+  },
+  {
+    path: '/editarfuncionario/:id',
+    name: 'EditarFuncionario',
+    component: () => import('../view/EditarFuncionarioView.vue')
   }
 ];
 

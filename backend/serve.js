@@ -57,6 +57,13 @@ app.use("/api/listacliente", listaClienteRoutes)
 const editarClienteRoutes = require("./router/EditarClienteRouter")
 app.use("/api/editarcliente", editarClienteRoutes)
 
+const listafuncionarioRoutes = require('./router/ListaFuncionarioRouter');
+app.use('/api/listafuncionario', listafuncionarioRoutes);
+
+const cadastroFuncionarioRoutes = require("./router/CadastroFuncionarioRouter")
+app.use("/api/funcionario", cadastroFuncionarioRoutes)
+
+
 // Log das rotas registradas
 console.log("Rotas registradas:")
 

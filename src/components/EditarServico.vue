@@ -97,83 +97,58 @@ export default {
   methods: {
    // No EditarServico.vue, altere o método carregarServico()
 async carregarServico() {
-  this.carregando = true;
-  this.erro = null;
-
-  if (!this.servicoId) {
-    this.erro = 'ID do serviço não especificado na URL';
-    this.carregando = false;
-    return;
-  }
-
   try {
-    // Use a rota que funciona: /api/editarservico
-    const response = await axios.get(`${this.apiBaseUrl}/editarservico/${this.servicoId}`);
-    this.servico = response.data;
-    console.log('📋 Serviço carregado:', this.servico);
-  } catch (error) {
-    console.error('❌ Erro ao buscar serviço:', error);
-    if (error.response) {
-      this.erro = `Erro ${error.response.status}: ${error.response.data?.message || 'Não foi possível buscar os dados do serviço'}`;
-    } else {
-      this.erro = 'Servidor não respondeu à solicitação. Verifique sua conexão.';
+    console.log(`Buscando serviço ID: ${this.servicoId}`);
+    
+    // Use a rota que funciona para listar todos e filtrar
+    const response = await axios.get(`${this.apiBaseUrl}/servico`);
+    const servicos = response.data;
+    
+    // Encontrar o serviço específico
+    const servicoEncontrado = servicos.find(s => s._id === this.servicoId);
+    
+    if (!servicoEncontrado) {
+      this.erro = 'Serviço não encontrado';
+      return;
     }
+    
+    this.servico = servicoEncontrado;
+    console.log('Serviço carregado:', this.servico);
+    
+  } catch (error) {
+    console.error('Erro ao buscar serviço:', error);
+    this.erro = 'Erro ao carregar dados do serviço';
+  } finally {
+    this.carregando = false;
   }
-
-  this.carregando = false;
 },
 
     async atualizarServico() {
-      this.salvando = true;
-      this.erro = null;
+  this.salvando = true;
+  this.erro = null;
 
-      // Atualiza a data de última atualização
-      this.servico.updatedAt = new Date();
+  try {
+    console.log(`💾 Salvando serviço ${this.servicoId}:`, this.servico);
 
-      console.log(`💾 Salvando serviço ${this.servicoId}:`, this.servico);
+    // Use apenas a rota /api/editarservico/:id
+    const response = await axios.put(`${this.apiBaseUrl}/editarservico/${this.servicoId}`, this.servico);
+    console.log('✅ Serviço salvo com sucesso:', response.data);
 
-      // Tenta salvar o serviço usando diferentes rotas
-      let response = null;
-      let error = null;
+    this.mostrarModalSucesso = true;
+  } catch (error) {
+    console.error('❌ Erro ao salvar serviço:', error);
 
-      // Tenta a rota /api/servico/:id
-      try {
-        response = await axios.put(`${this.apiBaseUrl}/editarservico/${this.servicoId}`, this.servico);
-        console.log('✅ Serviço salvo via /api/servico');
-      } catch (err) {
-        console.log('⚠️ Falha ao salvar via /api/servico, tentando /api/listaservico...');
-        error = err;
-      }
-
-      // Se falhou, tenta a rota /api/listaservico/:id
-      if (!response) {
-        try {
-          response = await axios.put(`${this.apiBaseUrl}/servico/${this.servicoId}`, this.servico);
-          console.log('✅ Serviço salvo via /api/listaservico');
-          error = null;
-        } catch (err) {
-          console.log('❌ Falha ao salvar em todas as rotas');
-          error = err;
-        }
-      }
-
-      // Processa o resultado
-      if (response && response.data) {
-        this.mostrarModalSucesso = true;
-      } else {
-        console.error('❌ Erro ao salvar serviço:', error);
-
-        if (error.response) {
-          this.erro = `Erro ${error.response.status}: ${error.response.data?.message || 'Não foi possível salvar o serviço'}`;
-        } else if (error.request) {
-          this.erro = 'Servidor não respondeu à solicitação. Verifique sua conexão.';
-        } else {
-          this.erro = `Erro na requisição: ${error.message}`;
-        }
-      }
-
-      this.salvando = false;
+    if (error.response) {
+      this.erro = `Erro ${error.response.status}: ${error.response.data?.erro || error.response.data?.message || 'Não foi possível salvar o serviço'}`;
+    } else if (error.request) {
+      this.erro = 'Servidor não respondeu à solicitação. Verifique sua conexão.';
+    } else {
+      this.erro = `Erro na requisição: ${error.message}`;
     }
+  }
+
+  this.salvando = false;
+}
   }
 };
 </script>
