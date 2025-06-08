@@ -1,17 +1,27 @@
 <template>
-  <div class="container">
-    <div class="recibo-card">
+  <div class="recibo">
+    <div class="recibo-conteudo" v-if="financeiro">
       <h2>Recibo de Pagamento</h2>
-      <div class="info">
-        <p><strong>Nome do Cliente:</strong> {{ recibo.nomeCliente }}</p>
-        <p><strong>Serviço Prestado:</strong> {{ recibo.servico }}</p>
-        <p><strong>Valor Pago:</strong> R$ {{ recibo.valor.toFixed(2) }}</p>
-        <p><strong>Forma de Pagamento:</strong> {{ recibo.formaPagamento }}</p>
-        <p><strong>Data:</strong> {{ recibo.data }}</p>
+
+      <div class="linha"><strong>Cliente:</strong> {{ financeiro.nomeCliente }}</div>
+      <div class="linha"><strong>Serviço:</strong> {{ financeiro.servicoPrestado }}</div>
+      <div class="linha"><strong>Mão de Obra:</strong> R$ {{ financeiro.maoDeObra.toFixed(2) }}</div>
+      <div class="linha"><strong>Peças:</strong> R$ {{ financeiro.pecas.toFixed(2) }}</div>
+      <div class="linha total"><strong>Valor Total:</strong> R$ {{ financeiro.valorTotal.toFixed(2) }}</div>
+      <div class="linha"><strong>Forma de Pagamento:</strong> {{ financeiro.formaPagamento }}</div>
+      <div class="linha"><strong>Status:</strong> {{ financeiro.statusPagamento }}</div>
+      <div class="linha"><strong>Data:</strong> {{ formatarData(financeiro.data) }}</div>
+
+      <div class="assinatura">
+        ____________________________________________
+        <br />
+        Assinatura do Cliente
       </div>
-      <div class="actions">
-        <button @click="salvarRecibo" class="btn-salvar">Salvar Recibo</button>
-      </div>
+
+      <button class="botao-imprimir" @click="imprimir">Imprimir</button>
+    </div>
+    <div v-else>
+      Carregando recibo...
     </div>
   </div>
 </template>
@@ -20,72 +30,99 @@
 import axios from 'axios';
 
 export default {
-  name: 'ReciboView',
+  name: 'ReciboPagamento',
   data() {
     return {
-      recibo: {
-        nomeCliente: 'João da Silva',
-        servico: 'Reparo na placa-mãe',
-        valor: 250.00,
-        formaPagamento: 'PIX',
-        data: new Date().toLocaleDateString()
-      }
+      financeiro: null
     };
   },
+  created() {
+    this.carregarRecibo();
+  },
   methods: {
-    async salvarRecibo() {
-      try {
-        const response = await axios.post('http://localhost:3000/api/recibo', this.recibo);
-        alert('Recibo salvo com sucesso!');
-        console.log('Resposta da API:', response.data);
-        this.$router.push('/financeiro'); // redireciona após salvar
-      } catch (error) {
-        console.error('Erro ao salvar recibo:', error);
-        alert('Erro ao salvar recibo.');
-      }
+    async carregarRecibo() {
+  const id = this.$route.params.id;
+  try {
+    // Use a rota correta para buscar os dados financeiros
+    const response = await axios.get(`http://localhost:3000/api/financeiro/${id}`);
+    this.financeiro = response.data;
+  } catch (err) {
+    console.error('Erro ao carregar recibo:', err);
+    alert('Recibo não encontrado. Verifique o ID.');
+  }
+},
+    formatarData(data) {
+      if (!data) return 'N/A';
+      const d = new Date(data);
+      return d.toLocaleDateString('pt-BR');
+    },
+    imprimir() {
+      window.print();
     }
   }
 };
 </script>
 
 <style scoped>
-.container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 20px;
+.recibo {
+  max-width: 700px;
+  margin: auto;
+  padding: 40px;
+  border: 1px solid #ccc;
   font-family: Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  background: white;
 }
 
-.recibo-card {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+.recibo-conteudo h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #2c3e50;
 }
 
-h2 {
-  margin-bottom: 1.5rem;
+.linha {
+  margin-bottom: 12px;
 }
 
-.info p {
-  margin-bottom: 0.8rem;
+.total {
+  font-size: 18px;
+  font-weight: bold;
+  color: #14b866;
+  margin-top: 10px;
 }
 
-.actions {
-  margin-top: 2rem;
+.assinatura {
+  margin-top: 60px;
+  text-align: center;
+  font-style: italic;
+  color: #555;
 }
 
-.btn-salvar {
-  background-color: #10b981;
+.botao-imprimir {
+  display: block;
+  margin: 40px auto 0;
+  padding: 10px 25px;
+  background-color: #14b866;
   color: white;
-  padding: 0.8rem 1.5rem;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 15px;
+  transition: 0.2s ease;
+}
+.botao-imprimir:hover {
+  background-color: #0f9e59;
 }
 
-.btn-salvar:hover {
-  background-color: #0e9e6e;
+@media print {
+  .botao-imprimir {
+    display: none;
+  }
+  .recibo {
+    border: none;
+    padding: 0;
+  }
 }
 </style>

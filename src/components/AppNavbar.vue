@@ -12,9 +12,6 @@
         <li>
           <router-link to="/estoque" class="nav-item">Inventário</router-link>
         </li>
-        <li>
-        <button href="/" class="login-btn">Acessar</button>
-        </li>
       </ul>
     </div>
   </nav>

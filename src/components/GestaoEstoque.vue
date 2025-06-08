@@ -11,7 +11,7 @@
         <li><a href="/listaservico">🛠️ Serviços</a></li>
         <li><a href="/listafuncionario">🧰 Técnicos</a></li>
         <li>
-          <router-link to="/relatorioos">📈 Relatórios</router-link>
+          <router-link to="/relatorio">📈 Relatórios</router-link>
         </li>
       </ul>
     </aside>

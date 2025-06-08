@@ -1,80 +1,90 @@
 <template>
-  <div class="nova-os-container">
-    <div class="form-section">
-      <h2>Editar Ordem de Serviço</h2>
-      <form @submit.prevent="atualizarOS">
-        <div class="form-group">
-          <label for="titulo">Título do pedido</label>
-          <input id="titulo" v-model="ordemServico.titulo" required />
+  <div class="estoque-layout">
+    <div class="estoque-container">
+      <div class="topo">
+        <h1>Editar Ordem de Serviço</h1>
+        <div class="id-container">
+          <label>Número da OS</label>
+          <input type="text" class="form-input id-input" v-model="ordemServico.numeroOS" readonly />
+        </div>
+      </div>
+
+      <div class="form-container">
+        <!-- Cliente -->
+        <div class="form-section">
+          <h2>🧾 Dados do Cliente</h2>
+          <div class="form-group"><label>Nome</label><input class="form-input" v-model="ordemServico.cliente" /></div>
+          <div class="form-group"><label>Telefone</label><input class="form-input" v-model="ordemServico.telefone" /></div>
+          <div class="form-group"><label>Email</label><input class="form-input" v-model="ordemServico.email" /></div>
+          <div class="form-group"><label>Endereço</label><input class="form-input" v-model="ordemServico.endereco" /></div>
+          <div class="form-group"><label>CEP</label><input class="form-input" v-model="ordemServico.cep" /></div>
+          <div class="form-group"><label>Estado</label><input class="form-input" v-model="ordemServico.estado" /></div>
         </div>
 
-        <div class="form-group">
-          <label for="cliente">Cliente</label>
-          <select id="cliente" v-model="ordemServico.cliente">
-            <option disabled value="">Selecionar</option>
-            <option>Empresa A</option>
-            <option>Empresa B</option>
-            <option>Empresa C</option>
-          </select>
+        <!-- Serviço -->
+        <div class="form-section">
+          <h2>🛠️ Serviço</h2>
+          <div class="form-group">
+            <label>Serviço Selecionado</label>
+           <input
+  type="text"
+  class="form-input"
+  :value="ordemServico.tipoServico?.nome || 'Serviço não encontrado'"
+  readonly
+/>
+
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="tecnico">Técnico Designado</label>
-          <select id="tecnico" v-model="ordemServico.tecnico">
-            <option disabled value="">Selecionar</option>
-            <option>João</option>
-            <option>Maria</option>
-            <option>Carlos</option>
-          </select>
+        <!-- Peças -->
+        <div class="form-section">
+          <h2>📦 Peças e Observações</h2>
+          <div v-if="ordemServico.produtos?.length">
+  <ul>
+    <li v-for="(item, i) in ordemServico.produtos" :key="i">
+      {{ item.produto?.nome || 'Produto desconhecido' }} - Qtd: {{ item.quantidade }} - R$ {{ item.valor.toFixed(2) }}
+    </li>
+  </ul>
+</div>
+
+          <div class="form-group">
+            <label>Observações / Peças adicionais</label>
+            <textarea class="form-textarea" v-model="ordemServico.pecaNecessaria" />
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="descricao">Descrição do serviço</label>
-          <textarea id="descricao" v-model="ordemServico.descricao" rows="4"></textarea>
+        <!-- Técnicos -->
+        <div class="form-section">
+          <h2>👨‍🔧 Técnicos Responsáveis</h2>
+          <div v-if="ordemServico.tecnicos?.length">
+  <ul>
+    <li v-for="(tecnico, i) in ordemServico.tecnicos" :key="i">
+      {{ tecnico?.nome || 'Técnico desconhecido' }} - {{ tecnico?.funcao || '' }}
+    </li>
+  </ul>
+</div>
+
+          <div v-else><p>Nenhum técnico vinculado.</p></div>
         </div>
 
-        <div class="form-group">
-          <label for="prioridade">Prioridade</label>
-          <select id="prioridade" v-model="ordemServico.prioridade">
-            <option disabled value="">Selecionar</option>
-            <option>Baixa</option>
-            <option>Média</option>
-            <option>Alta</option>
-          </select>
+        <!-- Status -->
+        <div class="form-section">
+          <h2>📌 Status da OS</h2>
+          <div class="form-group">
+            <label>Status</label>
+            <select class="form-input" v-model="ordemServico.status">
+              <option value="Pendente">Pendente</option>
+              <option value="Em Progresso">Em Progresso</option>
+              <option value="Completo">Completo</option>
+            </select>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="status">Status do pedido</label>
-          <select id="status" v-model="ordemServico.status">
-            <option disabled value="">Selecionar</option>
-            <option>Aberto</option>
-            <option>Em andamento</option>
-            <option>Finalizado</option>
-          </select>
+        <!-- Ações -->
+        <div class="form-actions">
+          <button class="botao-salvar" @click="salvar"> Salvar Alterações</button>
         </div>
-
-        <div class="form-group">
-          <label for="notas">Notas</label>
-          <textarea id="notas" v-model="ordemServico.notas" rows="3"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>Arquivos</label>
-          <input type="file" @change="handleFileUpload" />
-          <p v-if="ordemServico.arquivo">Arquivo atual: {{ ordemServico.arquivo.name || 'Já existente' }}</p>
-        </div>
-        <button type="submit" class="btn-salvar">Salvar Alterações</button>
-      </form>
-    </div>
-
-    <div class="resumo-section">
-      <h3>Resumo do pedido</h3>
-      <ul>
-        <li><strong>Data de criação:</strong> {{ ordemServico.dataCriacao }}</li>
-        <li><strong>Nº OS:</strong> #{{ ordemServico.numero }}</li>
-        <li><strong>Cliente:</strong> {{ ordemServico.cliente }}</li>
-        <li><strong>Status:</strong> {{ ordemServico.status }}</li>
-      </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -83,127 +93,141 @@
 import axios from 'axios';
 
 export default {
-  name: 'EditarOSView',
   data() {
     return {
-      ordemServico: {
-        titulo: '',
-        cliente: '',
-        tecnico: '',
-        descricao: '',
-        prioridade: '',
-        status: '',
-        notas: '',
-        arquivo: null,
-        dataCriacao: '',
-        numero: ''
-      }
+      ordemServico: {}
     };
   },
-  mounted() {
-    this.buscarOrdemServico();
-  },
   methods: {
-    async buscarOrdemServico() {
-      const id = this.$route.params.id;
-      try {
-        const response = await axios.get(`http://localhost:3000/api/pedido/${id}`);
-        this.ordemServico = response.data;
-      } catch (error) {
-        console.error('Erro ao buscar OS:', error);
-      }
-    },
-    async atualizarOS() {
+    async carregarOrdem() {
+    const id = this.$route.params.id;
+    if (!id) {
+        console.error('ID não encontrado');
+        alert('ID da OS não foi fornecido');
+        return;
+    }
+    try {
+        const { data } = await axios.get(`http://localhost:3000/api/editarnovaos/${id}`);
+        this.ordemServico = data;
+    } catch (err) {
+        console.error('Erro ao carregar OS:', err);
+        // Substitua $notify por alert simples
+        alert('Erro ao carregar ordem de serviço. Verifique o console para detalhes.');
+        // Ou instale e use um sistema de notificações como Toast
+    }
+},
+    async salvar() {
       const id = this.$route.params.id;
       try {
         await axios.put(`http://localhost:3000/api/editarnovaos/${id}`, this.ordemServico);
-        alert('Ordem de Serviço atualizada com sucesso!');
-        this.$router.push('/pedidos');
-      } catch (error) {
-        console.error('Erro ao atualizar OS:', error);
+        alert('Ordem de serviço atualizada com sucesso!');
+        this.$router.push('/gestaopedido');
+      } catch (err) {
+        console.error('Erro ao salvar:', err);
+        alert('Erro ao salvar ordem de serviço.');
       }
-    },
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      this.ordemServico.arquivo = file.name || file;
     }
+  },
+  mounted() {
+    this.carregarOrdem();
   }
 };
 </script>
 
-
 <style scoped>
-.nova-os-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  max-width: 1100px;
+.estoque-layout {
+  max-width: 900px;
   margin: 2rem auto;
+  padding: 20px;
   font-family: Arial, sans-serif;
 }
-
-.form-section {
-  flex: 1;
-  min-width: 600px;
+.estoque-container {
   background: #fff;
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
 }
-
-.resumo-section {
-  width: 250px;
-  background: #f9fafb;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  font-size: 0.95rem;
+.topo {
+  margin-bottom: 20px;
 }
-
+h1 {
+  font-size: 28px;
+  font-weight: bold;
+}
+.form-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+}
+.form-section {
+  margin-bottom: 30px;
+}
+.form-section h2 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #eee;
+}
 .form-group {
-  margin-bottom: 1.3rem;
+  margin-bottom: 20px;
 }
-
-label {
-  font-weight: 600;
+.form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: #555;
 }
-
-input,
-select,
-textarea {
-  width: 100%;
-  padding: 0.65rem;
+.form-input,
+.form-textarea,
+select {
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 14px;
+  width: 100%;
 }
-
-textarea {
+.form-textarea {
+  min-height: 100px;
   resize: vertical;
 }
-
-.btn-salvar {
-  background-color: #10b981;
-  color: white;
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
+.id-input {
+  font-family: 'Courier New', monospace;
+  background: #f4f4f4;
+  border: 2px solid #007bff;
+  color: #333;
+  text-align: center;
+  font-weight: bold;
 }
-
-.btn-salvar:hover {
-  background-color: #0e9e6e;
-}
-
-ul {
+.produto-lista,
+.tecnico-lista {
   list-style: none;
-  padding: 0;
+  padding-left: 0;
+  margin-bottom: 10px;
 }
-
-li {
-  margin-bottom: 0.8rem;
+.produto-item {
+  background: #f1f1f1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+.form-actions {
+  text-align: center;
+  margin-top: 20px;
+}
+.botao-salvar {
+  background: #14b866;
+  color: white;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  border: none;
+}
+.botao-salvar:hover {
+  background: #119955;
+  transform: scale(1.02);
 }
 </style>

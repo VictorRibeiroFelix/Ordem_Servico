@@ -39,12 +39,12 @@ const routes = [
     component: () => import('../view/FinanceiroView.vue')
   },
   {
-    path: '/recibo',
+    path: '/recibo/:id',
     name: 'Recibo',
     component: () => import('../view/ReciboView.vue')
   },
   {
-    path: '/editarnovaos',
+    path: '/editarnovaos/:id',
     name: 'EditarNovaOS',
     component: () => import('../view/EditarNovaOSView.vue')
   },
@@ -92,6 +92,11 @@ const routes = [
     path: '/editarfuncionario/:id',
     name: 'EditarFuncionario',
     component: () => import('../view/EditarFuncionarioView.vue')
+  },
+  {
+    path: '/relatorio',
+    name: 'Relatorio',
+    component: () => import('../view/RelatorioView.vue')
   }
 ];
 

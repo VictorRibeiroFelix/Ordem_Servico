@@ -24,34 +24,33 @@
     <table class="tabela">
       <thead>
         <tr>
-          <th>ID Pedido</th>
+          <th>Número OS</th>
           <th>Cliente</th>
           <th>Data</th>
           <th>Status</th>
-          <th>Tipo de serviço</th>
-          <th>Técnico</th>
+          <th>Valor Total</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(pedido, index) in pedidosPaginados" :key="pedido.id">
-          <td>{{ pedido.id }}</td>
+        <tr v-for="pedido in pedidosPaginados" :key="pedido._id">
+          <td>{{ pedido.numeroOS }}</td>
           <td>{{ pedido.cliente }}</td>
-          <td>{{ formatarData(pedido.data) }}</td>
+          <td>{{ formatarData(pedido.criadoEm || pedido.dataEntrada) }}</td>
           <td>
-            <span :class="'status ' + pedido.status.toLowerCase().replace(' ', '-')">
-              {{ pedido.status }}
+            <span :class="'status ' + (pedido.status || 'pendente').toLowerCase().replace(' ', '-')">
+              {{ pedido.status || 'Pendente' }}
             </span>
           </td>
-          <td>{{ pedido.servico }}</td>
-          <td>{{ pedido.tecnico }}</td>
+          <td class="valor-total-cell">R$ {{ (pedido.valorTotal || pedido.valor || 0).toFixed(2) }}</td>
           <td class="acoes">
-            <router-link to="/editarnovaos" class="botao-editar">Editar</router-link>
-            <button @click="confirmarExclusao(index)" class="botao-excluir">Excluir</button>
+            <router-link :to="{ name: 'EditarNovaOS', params: { id: pedido._id } }" class="botao-editar">Editar</router-link>
+            <button @click="confirmarExclusao(pedido)" class="botao-excluir">Excluir</button>
+            <button @click="irParaPagamento(pedido)" class="botao-pagamento">Pagamento</button>
           </td>
         </tr>
         <tr v-if="pedidosFiltrados.length === 0">
-          <td colspan="7" class="sem-resultados">Nenhuma ordem encontrada</td>
+          <td colspan="6" class="sem-resultados">Nenhuma ordem encontrada</td>
         </tr>
       </tbody>
     </table>
@@ -69,7 +68,6 @@
       <button @click="paginaAtual++" :disabled="paginaAtual === totalPaginas">›</button>
     </div>
 
-    <!-- Barra inferior com contadores -->
     <div class="resumo-status">
       <div
         v-for="status in statuses.filter(s => s.key !== 'todos')"
@@ -79,7 +77,7 @@
         <div class="info">
           <div class="label">{{ status.label }}</div>
           <div class="quantidade">
-            {{ pedidos.filter(p => p.status === status.label).length }}
+            {{ contarPorStatus(status.key) }}
           </div>
         </div>
         <div :class="['icone', status.key]"></div>
@@ -90,7 +88,7 @@
     <div v-if="mostrarModal" class="modal-overlay">
       <div class="modal">
         <h3>Confirmar Exclusão</h3>
-        <p>Tem certeza que deseja excluir a ordem de serviço {{ pedidoParaExcluir?.id }}?</p>
+        <p>Tem certeza que deseja excluir a ordem de {{ pedidoParaExcluir?.cliente }}?</p>
         <div class="modal-botoes">
           <button @click="cancelarExclusao" class="botao-cancelar">Cancelar</button>
           <button @click="confirmarExclusaoFinal" class="botao-confirmar">Confirmar</button>
@@ -106,6 +104,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
+      numeroOS: '',
       pedidos: [],
       busca: '',
       paginaAtual: 1,
@@ -123,25 +122,28 @@ export default {
   },
   computed: {
     pedidosFiltrados() {
-      let filtrados = this.pedidos;
+  let filtrados = this.pedidos;
 
-      if (this.currentStatus !== 'todos') {
-        filtrados = filtrados.filter(p => p.status.toLowerCase() === this.currentStatus);
-      }
+  // ✅ Filtro por status
+  if (this.currentStatus !== 'todos') {
+    filtrados = filtrados.filter(p => p.status === this.currentStatus);
+  }
 
-      if (this.busca.trim() !== '') {
-        const termo = this.busca.trim().toLowerCase();
-        filtrados = filtrados.filter(p =>
-          p.cliente.toLowerCase().includes(termo) ||
-          p.tecnico?.toLowerCase().includes(termo) ||
-          p.servico?.toLowerCase().includes(termo)
-        );
-      }
+  // ✅ Filtro por texto
+  if (this.busca.trim() !== '') {
+    const termo = this.busca.trim().toLowerCase();
+    filtrados = filtrados.filter(p =>
+      p.cliente?.toLowerCase().includes(termo) ||
+      (p.descricao || '').toLowerCase().includes(termo) ||
+      (p.defeito || '').toLowerCase().includes(termo) ||
+      this.exibirNumeroOS(p).toLowerCase().includes(termo)
+    );
+  }
 
-      return filtrados;
-    },
+  return filtrados;
+},
     totalPaginas() {
-      return Math.ceil(this.pedidosFiltrados.length / this.itensPorPagina);
+      return Math.max(1, Math.ceil(this.pedidosFiltrados.length / this.itensPorPagina));
     },
     pedidosPaginados() {
       const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
@@ -153,21 +155,52 @@ export default {
   },
   methods: {
     async carregarOrdens() {
-      try {
-        const response = await axios.get('http://localhost:3000/api/pedido');
-        console.log('Pedidos recebidos:', response.data);
-        this.pedido = response.data;
-      } catch (err) {
-        console.error('Erro ao carregar estoque:', err);
-      }
-    },
+  try {
+    let pedidosData = [];
+
+    // Buscar pedidos
+    try {
+      const responsePedido = await axios.get('http://localhost:3000/api/pedido');
+      pedidosData = responsePedido.data;
+    } catch (err) {
+      console.log('Erro /api/pedido:', err.message);
+    }
+
+    // Buscar ordens de novaos
+    try {
+      const responseNovaOS = await axios.get('http://localhost:3000/api/novaos');
+      pedidosData = [...pedidosData, ...responseNovaOS.data];
+    } catch (err) {
+      console.log('Erro /api/novaos:', err.message);
+    }
+
+    // ✅ Normaliza os status
+    pedidosData = pedidosData.map(p => {
+      const status = (p.status || 'pendente').toLowerCase();
+      return {
+        ...p,
+        status:
+          status === 'em andamento' ? 'em-progresso' :
+          status === 'completo' ? 'completo' :
+          status === 'pendente' ? 'pendente' : 'pendente'
+      };
+    });
+
+    this.pedidos = pedidosData;
+  } catch (error) {
+    console.error('Erro geral ao carregar ordens:', error);
+  }
+},
     formatarData(data) {
-      if (!data) return '';
+      if (!data) return 'N/A';
       const d = new Date(data);
-      return d.toLocaleDateString();
+      return d.toLocaleDateString('pt-BR');
     },
-    confirmarExclusao(index) {
-      this.pedidoParaExcluir = this.pedidosPaginados[index];
+    contarPorStatus(status) {
+  return this.pedidos.filter(p => p.status === status).length;
+},
+    confirmarExclusao(pedido) {
+      this.pedidoParaExcluir = pedido;
       this.mostrarModal = true;
     },
     cancelarExclusao() {
@@ -176,17 +209,45 @@ export default {
     },
     async confirmarExclusaoFinal() {
       if (!this.pedidoParaExcluir) return;
-
       try {
-        await axios.delete(`http://localhost:3000/api/pedido/${this.pedidoParaExcluir._id}`);
-        this.carregarOrdens();
-        this.cancelarExclusao();
+        const id = this.pedidoParaExcluir._id;
+        try {
+          await axios.delete(`http://localhost:3000/api/novaos/${id}`);
+          this.carregarOrdens();
+          this.cancelarExclusao();
+          alert('Ordem excluída com sucesso!');
+          return;
+        } catch (err) {
+          console.log('Erro /api/novaos:', err.message);
+        }
+        try {
+          await axios.delete(`http://localhost:3000/api/pedido/${id}`);
+          this.carregarOrdens();
+          this.cancelarExclusao();
+          alert('Ordem excluída com sucesso!');
+        } catch (err) {
+          console.error('Erro /api/pedido:', err.message);
+          throw new Error('Falha ao excluir');
+        }
       } catch (error) {
-        console.error('Erro ao excluir ordem:', error);
+        alert(`Erro: ${error.message}`);
       }
+    },
+    irParaPagamento(pedido) {
+      this.$router.push({
+        name: 'Financeiro',
+        query: {
+          cliente: pedido.cliente,
+          servicoPrestado: pedido.equipamento || '',
+          maoDeObra: 0,
+          pecas: 0,
+          valorTotal: pedido.valorTotal || pedido.valor || 0,
+          formaPagamento: pedido.formaPagamento || '',
+          pedidoId: pedido._id
+        }
+      });
     }
   }
-  
 };
 </script>
 
@@ -318,6 +379,7 @@ h1 {
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
+  text-decoration: none;
 }
 
 .botao-editar:hover {
@@ -480,5 +542,25 @@ h1 {
 
 .botao-confirmar:hover {
   background: #c0392b;
+}
+
+.valor-total-cell {
+  font-weight: bold;
+  color: #14b866;
+}
+
+.botao-pagamento {
+  background-color: #14b866;
+  color: white;
+  border: 1px solid #13a35c;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.botao-pagamento:hover {
+  background-color: #13a35c;
 }
 </style>

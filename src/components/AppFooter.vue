@@ -7,7 +7,7 @@
         <a href="/privacidade">Política de Privacidade</a>
         <a href="/termos">Termos de Serviço</a>
       </div>
-      <p class="footer-copy">&copy; 2024 <strong>Service Flow</strong>. Todos os direitos reservados.</p>
+      <p class="footer-copy">&copy; 2025 <strong>Service Flow</strong>. Todos os direitos reservados.</p>
     </div>
   </footer>
 </template>

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const PedidoSchema = new mongoose.Schema({
+  numeroOS: { type: String, required: true },
   cliente: { type: String, required: true },
   equipamento: { type: String, required: true },
   defeito: { type: String },

@@ -8,7 +8,7 @@
         <li><router-link to="/listacliente">👥 Clientes</router-link></li>
         <li><router-link to="/listaservico">🛠️ Serviços</router-link></li>
         <li class="active"><a href="#">🧰 Técnicos</a></li>
-        <li><router-link to="/relatorioos">📈 Relatórios</router-link></li>
+        <li><router-link to="/relatorio">📈 Relatórios</router-link></li>
       </ul>
     </aside>
 
