@@ -5,8 +5,6 @@
 
       <div class="linha"><strong>Cliente:</strong> {{ financeiro.nomeCliente }}</div>
       <div class="linha"><strong>Serviço:</strong> {{ financeiro.servicoPrestado }}</div>
-      <div class="linha"><strong>Mão de Obra:</strong> R$ {{ financeiro.maoDeObra.toFixed(2) }}</div>
-      <div class="linha"><strong>Peças:</strong> R$ {{ financeiro.pecas.toFixed(2) }}</div>
       <div class="linha total"><strong>Valor Total:</strong> R$ {{ financeiro.valorTotal.toFixed(2) }}</div>
       <div class="linha"><strong>Forma de Pagamento:</strong> {{ financeiro.formaPagamento }}</div>
       <div class="linha"><strong>Status:</strong> {{ financeiro.statusPagamento }}</div>

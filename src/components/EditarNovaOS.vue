@@ -100,28 +100,29 @@ export default {
   },
   methods: {
     async carregarOrdem() {
-    const id = this.$route.params.id;
-    if (!id) {
-        console.error('ID não encontrado');
-        alert('ID da OS não foi fornecido');
-        return;
-    }
-    try {
-        const { data } = await axios.get(`http://localhost:3000/api/editarnovaos/${id}`);
-        this.ordemServico = data;
-    } catch (err) {
-        console.error('Erro ao carregar OS:', err);
-        // Substitua $notify por alert simples
-        alert('Erro ao carregar ordem de serviço. Verifique o console para detalhes.');
-        // Ou instale e use um sistema de notificações como Toast
-    }
+  const id = this.$route.params.id;
+  console.log('ID da OS:', id); // ✅ Adicione AQUI
+
+  if (!id) {
+    console.error('ID não encontrado');
+    alert('ID da OS não foi fornecido');
+    return;
+  }
+
+  try {
+    const { data } = await axios.get(`http://localhost:3000/api/editarnovaos/${id}`);
+    this.ordemServico = data;
+  } catch (err) {
+    console.error('Erro ao carregar OS:', err);
+    alert('Erro ao carregar ordem de serviço. Verifique o console para detalhes.');
+  }
 },
     async salvar() {
       const id = this.$route.params.id;
       try {
         await axios.put(`http://localhost:3000/api/editarnovaos/${id}`, this.ordemServico);
         alert('Ordem de serviço atualizada com sucesso!');
-        this.$router.push('/gestaopedido');
+        this.$router.push('/pedido');
       } catch (err) {
         console.error('Erro ao salvar:', err);
         alert('Erro ao salvar ordem de serviço.');

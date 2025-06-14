@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const NovaOSSchema = new mongoose.Schema({
   numeroOS: { type: String, required: true },
   cliente: { type: String, required: true },
@@ -14,13 +16,13 @@ const NovaOSSchema = new mongoose.Schema({
   },
 
   produtos: [{
-    produto: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Produto'
-    },
-    quantidade: { type: Number, default: 1 },
-    valor: { type: Number, default: 0 }
-  }],
+  produto: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Estoque' // ✅ TEM QUE ESTAR "Estoque" aqui!
+  },
+  quantidade: { type: Number, default: 1 },
+  valor: { type: Number, default: 0 }
+}],
 
   tecnicos: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -32,3 +34,5 @@ const NovaOSSchema = new mongoose.Schema({
   status: { type: String, default: 'pendente' },
   criadoEm: { type: Date, default: Date.now }
 });
+
+module.exports = mongoose.model('NovaOS', NovaOSSchema);

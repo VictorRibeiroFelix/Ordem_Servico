@@ -1,4 +1,3 @@
-// Para Vue 3
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../view/HomeView.vue'
 
@@ -25,7 +24,7 @@ const routes = [
   },
   {
     path: '/produto',
-    name: 'Produto',
+    name: 'CadastroProduto',
     component: () => import('../view/CadastroProdutoView.vue')
   },
   {
@@ -44,13 +43,13 @@ const routes = [
     component: () => import('../view/ReciboView.vue')
   },
   {
-    path: '/editarnovaos/:id',
-    name: 'EditarNovaOS',
-    component: () => import('../view/EditarNovaOSView.vue')
-  },
+  path: '/editarnovaos/:id',
+  name: 'EditarNovaOS',
+  component: () => import('../view/EditarNovaOSView.vue')
+},
   {
     path: '/servico',
-    name: 'Servico',
+    name: 'CadastroServico',
     component: () => import('../view/CadastroServicoView.vue')
   },
   {
@@ -70,7 +69,7 @@ const routes = [
   },
   {
     path: '/cliente',
-    name: 'Cliente',
+    name: 'CadastroCliente',
     component: () => import('../view/CadastroClienteView.vue')
   },
   {
@@ -85,7 +84,7 @@ const routes = [
   },
   {
     path: '/funcionario',
-    name: 'Funcionario',
+    name: 'CadastroFuncionario',
     component: () => import('../view/CadastroFuncionarioView.vue')
   },
   {
@@ -98,11 +97,11 @@ const routes = [
     name: 'Relatorio',
     component: () => import('../view/RelatorioView.vue')
   }
-];
+]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
-});
+})
 
-export default router;
+export default router

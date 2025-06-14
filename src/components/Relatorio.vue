@@ -31,7 +31,6 @@
             <th>Número</th>
             <th>Cliente</th>
             <th>Status</th>
-            <th>Serviço</th>
             <th>Data</th>
             <th>Valor Total</th>
           </tr>
@@ -41,12 +40,11 @@
             <td>{{ ordem.numeroOS || 'N/A' }}</td>
             <td>{{ ordem.cliente || 'N/A' }}</td>
             <td>{{ ordem.status || 'Pendente' }}</td>
-            <td>{{ typeof ordem.tipoServico === 'object' ? ordem.tipoServico?.nome : ordem.tipoServico || 'N/A' }}</td>
             <td>{{ formatarData(ordem.criadoEm) }}</td>
             <td>R$ {{ parseFloat(ordem.valorTotal || 0).toFixed(2) }}</td>
           </tr>
           <tr v-if="ordensFiltradas.length === 0">
-            <td colspan="6" class="sem-resultados">Nenhum resultado encontrado</td>
+            <td colspan="5" class="sem-resultados">Nenhum resultado encontrado</td>
           </tr>
         </tbody>
       </table>
